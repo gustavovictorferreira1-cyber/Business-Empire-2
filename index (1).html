@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Empire: RichMan Clone</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col select-none">
+
+    <!-- Top Bar: Dinheiro e Estatísticas (Tela cheia) -->
+    <header class="bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-4">
+                <div class="bg-emerald-500/10 p-3 rounded-2xl border border-emerald-500/20">
+                    <i class="fa-solid fa-wallet text-emerald-400 text-2xl"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400 font-medium uppercase tracking-wider">Patrimônio Líquido</p>
+                    <h1 id="net-worth" class="text-3xl font-black text-emerald-400">R$0</h1>
+                </div>
+            </div>
+            <div class="flex items-center gap-8 bg-slate-950/60 px-6 py-3 rounded-2xl border border-slate-800/80 shadow-inner">
+                <div class="text-center">
+                    <p class="text-xs text-slate-400 uppercase tracking-wider">Dinheiro Líquido</p>
+                    <span id="cash" class="text-xl font-bold text-slate-200">R$0</span>
+                </div>
+                <div class="h-8 w-px bg-slate-800"></div>
+                <div class="text-center">
+                    <p class="text-xs text-slate-400 uppercase tracking-wider">Lucro / Seg</p>
+                    <span id="passive-income" class="text-xl font-bold text-emerald-400">+R$0/s</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="max-w-7xl w-full mx-auto p-4 md:p-6 flex-grow pb-28">
+        
+        <!-- Aba: Negócios -->
+        <div id="tab-businesses" class="tab-content space-y-6">
+            <div class="bg-gradient-to-r from-emerald-900/40 to-slate-900 border border-emerald-500/30 rounded-3xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+                <div>
+                    <h3 class="font-bold text-slate-200 text-lg">
+                        <i class="fa-solid fa-hand-pointer text-emerald-400 mr-2"></i> Trabalhar (<span id="work-title">Freela Júnior</span>) 
+                        <span id="boost-status" class="hidden text-xs bg-amber-500/20 text-amber-300 px-2.5 py-1 rounded-lg border border-amber-500/30 font-bold ml-2 animate-pulse">2X ATIVO (<span id="boost-timer">20</span>s)</span>
+                    </h3>
+                    <p class="text-sm text-slate-400 mt-1">Ganha <span id="work-income-display" class="text-emerald-400 font-bold">R$ 1,00</span> por clique</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                    <button onclick="workClick()" class="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 active:scale-95 px-8 py-3.5 rounded-2xl font-bold text-sm cursor-pointer transition shadow-lg">
+                        Trabalhar
+                    </button>
+                    <button onclick="upgradeWork()" class="flex-1 md:flex-none bg-blue-600 hover:bg-blue-500 active:scale-95 px-6 py-3.5 rounded-2xl font-bold text-sm cursor-pointer transition shadow-lg text-center">
+                        Evoluir (<span id="work-upgrade-cost">R$ 100,00</span>)
+                    </button>
+                    <button onclick="activateBoost()" id="boost-btn" class="w-full md:w-auto bg-amber-600 hover:bg-amber-500 active:scale-95 px-6 py-3.5 rounded-2xl font-bold text-sm cursor-pointer transition shadow-lg text-center flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-bolt"></i> Impulsionar (R$ 50,00)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Painel do Banco Próprio -->
+            <div id="my-bank-section" class="hidden bg-gradient-to-r from-purple-900/40 to-slate-900 border border-purple-500/30 rounded-3xl p-6 space-y-4 shadow-xl">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-slate-200 text-lg"><i class="fa-solid fa-building-columns text-purple-400 mr-2"></i> O Seu Próprio Banco</h3>
+                    <span class="text-xs bg-purple-500/20 text-purple-300 px-3 py-1.5 rounded-xl border border-purple-500/30 font-bold">Ativo</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                    <div class="bg-slate-950/50 p-4 rounded-2xl border border-slate-800/60">
+                        <span class="text-slate-400 block text-xs">Capital Alocado</span>
+                        <span id="my-bank-capital" class="font-bold text-slate-200 text-lg">R$ 0,00</span>
+                    </div>
+                    <div class="bg-slate-950/50 p-4 rounded-2xl border border-slate-800/60">
+                        <span class="text-slate-400 block text-xs">Lucro do Banco / Seg</span>
+                        <span id="my-bank-income" class="font-bold text-emerald-400 text-lg">+R$ 0,00/s</span>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row items-center justify-between bg-slate-950/50 p-4 rounded-2xl border border-slate-800/60 text-sm gap-4">
+                    <div>
+                        <span class="text-slate-300 font-bold block">Taxa de Juros Oferecida</span>
+                        <span class="text-xs text-slate-400">Define o retorno e atração de clientes</span>
+                    </div>
+                    <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                        <input type="range" id="my-bank-rate" min="5" max="30" value="10" oninput="updateBankRate(this.value)" class="accent-purple-500 cursor-pointer w-36">
+                        <span id="my-bank-rate-val" class="font-bold text-purple-400 w-12 text-right">10%</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <button onclick="investInMyBank()" class="bg-purple-600 hover:bg-purple-500 py-3 rounded-2xl font-bold text-sm cursor-pointer transition shadow-md">Investir Capital (+R$ 10K)</button>
+                    <button onclick="withdrawFromMyBank()" class="bg-slate-800 hover:bg-slate-700 py-3 rounded-2xl font-bold text-sm cursor-pointer transition shadow-md">Retirar Capital</button>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center mb-2 mt-6">
+                <h2 class="text-xl font-bold text-slate-200 flex items-center gap-2">
+                    <i class="fa-solid fa-briefcase text-blue-400"></i> Negócios & Empresas
+                </h2>
+                <span class="text-xs text-slate-400">Gera rendimento passivo</span>
+            </div>
+            <div id="businesses-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+
+        <!-- Aba: Ações & Cripto -->
+        <div id="tab-stocks" class="tab-content space-y-6 hidden">
+            <div class="flex justify-between items-center mb-2">
+                <h2 class="text-xl font-bold text-slate-200 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-line text-emerald-400"></i> Bolsa de Valores & Cripto
+                </h2>
+                <span class="text-xs text-slate-400">Compra barato, vende caro</span>
+            </div>
+            <div id="stocks-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+        </div>
+
+        <!-- Aba: Imobiliário -->
+        <div id="tab-realestate" class="tab-content space-y-6 hidden">
+            <div class="flex justify-between items-center mb-2">
+                <h2 class="text-xl font-bold text-slate-200 flex items-center gap-2">
+                    <i class="fa-solid fa-building text-amber-400"></i> Imobiliário & Veículos
+                </h2>
+                <span class="text-xs text-slate-400">Estilo de vida e luxo</span>
+            </div>
+            <div id="realestate-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+
+        <!-- Aba: Banco -->
+        <div id="tab-bank" class="tab-content space-y-6 hidden">
+            <div class="flex justify-between items-center mb-2">
+                <h2 class="text-xl font-bold text-slate-200 flex items-center gap-2">
+                    <i class="fa-solid fa-landmark text-purple-400"></i> Banco Central
+                </h2>
+                <span class="text-xs text-slate-400">Empréstimos e Depósitos</span>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-6 shadow-xl max-w-2xl mx-auto">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                    <div>
+                        <h3 class="font-bold text-slate-200 text-base">Conta Poupança (Juros 2%/min)</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">Saldo atual: <span id="bank-savings" class="text-emerald-400 font-bold text-sm">R$0</span></p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="depositBank()" class="bg-emerald-600 hover:bg-emerald-500 text-xs px-4 py-2.5 rounded-xl font-bold cursor-pointer transition shadow-md">Depositar</button>
+                        <button onclick="withdrawBank()" class="bg-slate-800 hover:bg-slate-700 text-xs px-4 py-2.5 rounded-xl font-bold cursor-pointer transition shadow-md">Retirar</button>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-200 text-base mb-2">Crédito Bancário</h3>
+                    <p class="text-xs text-slate-400 mb-4">Defina o valor do empréstimo para investir onde quiser. Há juros fixos de 100% no montante e prazo de 48h.</p>
+                    <div id="loan-container"></div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Barra de Navegação Inferior -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur border-t border-slate-800 p-3 z-50 shadow-2xl">
+        <div class="max-w-lg mx-auto grid grid-cols-4 gap-2 text-center">
+            <button onclick="switchTab('businesses', this)" class="nav-btn py-2.5 px-2 rounded-2xl text-emerald-400 font-bold flex flex-col items-center gap-1 cursor-pointer transition">
+                <i class="fa-solid fa-briefcase text-xl"></i>
+                <span class="text-xs">Negócios</span>
+            </button>
+            <button onclick="switchTab('stocks', this)" class="nav-btn py-2.5 px-2 rounded-2xl text-slate-400 font-bold flex flex-col items-center gap-1 cursor-pointer transition">
+                <i class="fa-solid fa-chart-line text-xl"></i>
+                <span class="text-xs">Bolsa</span>
+            </button>
+            <button onclick="switchTab('realestate', this)" class="nav-btn py-2.5 px-2 rounded-2xl text-slate-400 font-bold flex flex-col items-center gap-1 cursor-pointer transition">
+                <i class="fa-solid fa-building text-xl"></i>
+                <span class="text-xs">Imóveis</span>
+            </button>
+            <button onclick="switchTab('bank', this)" class="nav-btn py-2.5 px-2 rounded-2xl text-slate-400 font-bold flex flex-col items-center gap-1 cursor-pointer transition">
+                <i class="fa-solid fa-landmark text-xl"></i>
+                <span class="text-xs">Banco</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Modal de Alerta -->
+    <div id="modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 md:p-8 text-center space-y-5 shadow-2xl">
+            <h3 id="modal-title" class="text-xl font-bold text-slate-100">Aviso</h3>
+            <p id="modal-message" class="text-sm text-slate-300 leading-relaxed">Mensagem aqui...</p>
+            <button onclick="closeModal()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-3 rounded-2xl font-bold text-sm cursor-pointer transition shadow-md">Entendido</button>
+        </div>
+    </div>
+
+    <!-- Modal Personalizado para Pedir Empréstimo -->
+    <div id="loan-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 md:p-8 space-y-5 shadow-2xl">
+            <h3 class="text-xl font-bold text-slate-100 text-center">Solicitar Empréstimo</h3>
+            <p class="text-xs text-slate-400 text-center">Informe quanto deseja pegar emprestado (Limite: <span id="loan-modal-limit" class="text-emerald-400 font-bold">R$0</span>). <br><span class="text-rose-400 font-semibold">*Incide taxa de 100% de juros totais (Dívida = Valor x 2).</span></p>
+            <input type="number" id="loan-input-amount" class="w-full bg-slate-950 border border-slate-800 rounded-2xl px-4 py-3 text-slate-100 text-center font-bold text-xl focus:outline-none focus:border-purple-500 shadow-inner" placeholder="0">
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <button onclick="closeLoanModal()" class="bg-slate-800 hover:bg-slate-700 py-3 rounded-2xl font-bold text-xs cursor-pointer transition">Cancelar</button>
+                <button onclick="confirmTakeLoan()" class="bg-purple-600 hover:bg-purple-500 py-3 rounded-2xl font-bold text-xs cursor-pointer transition shadow-md">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let game = {
+            cash: 50,
+            bankSavings: 0,
+            loan: 0,
+            loanLimit: 1000,
+            loanHoursLeft: 48, 
+            secondCounter: 0,  
+            workLevel: 1,
+            boostActive: false,
+            boostTimer: 0,
+            lastSaveTime: Date.now(),
+            myBank: {
+                unlocked: false,
+                cost: 100000,
+                capital: 0,
+                interestRate: 10,
+                income: 0
+            },
+            businesses: [
+                { id: 'cafe', name: 'Café Local', level: 0, cost: 350, income: 4, icon: 'fa-mug-hot' },
+                { id: 'carwash', name: 'Lavagem de Carros', level: 0, cost: 1800, income: 22, icon: 'fa-car' },
+                { id: 'supermarket', name: 'Supermercado', level: 0, cost: 9500, income: 110, icon: 'fa-basket-shopping' },
+                { id: 'restaurant', name: 'Restaurante Luxuoso', level: 0, cost: 45000, income: 550, icon: 'fa-utensils' },
+                { id: 'techcorp', name: 'Empresa de Software', level: 0, cost: 200000, income: 2400, icon: 'fa-laptop-code' },
+                { id: 'mybank', name: 'Banco Comercial Próprio', level: 0, cost: 100000, income: 1200, icon: 'fa-building-columns', isCustomBank: true }
+            ],
+            stocks: [
+                { id: 'apple', name: 'Apple Inc.', price: 120, owned: 0, totalInvested: 0 },
+                { id: 'tesla', name: 'Tesla Motors', price: 250, owned: 0, totalInvested: 0 },
+                { id: 'btc', name: 'Bitcoin (Crypto)', price: 3500, owned: 0, totalInvested: 0 },
+                { id: 'eth', name: 'Ethereum (Crypto)', price: 1800, owned: 0, totalInvested: 0 }
+            ],
+            realEstate: [
+                { id: 'apt', name: 'Apartamento T2', cost: 120000, owned: false, income: 650, icon: 'fa-house' },
+                { id: 'villa', name: 'Mansão de Luxo', cost: 750000, owned: false, income: 3800, icon: 'fa-landmark-dome' },
+                { id: 'hypercar', name: 'Hiperdesportivo', cost: 1500000, owned: false, income: 0, icon: 'fa-car-side' }
+            ]
+        };
+
+        const workTiers = [
+            { level: 1, title: 'Freela Júnior', income: 1, cost: 100 },
+            { level: 2, title: 'Freela Pleno', income: 3, cost: 500 },
+            { level: 3, title: 'Freela Sênior', income: 8, cost: 2500 },
+            { level: 4, title: 'Consultor Sênior', income: 20, cost: 10000 },
+            { level: 5, title: 'Diretor Executivo', income: 50, cost: 50000 }
+        ];
+
+        // Sistema de Salvamento e Carregamento (LocalStorage)
+        function saveGame() {
+            game.lastSaveTime = Date.now();
+            localStorage.setItem('business_empire_save', JSON.stringify(game));
+        }
+
+        function loadGame() {
+            let savedData = localStorage.getItem('business_empire_save');
+            if (savedData) {
+                try {
+                    let parsed = JSON.parse(savedData);
+                    game = { ...game, ...parsed };
+                    
+                    if (parsed.lastSaveTime) {
+                        let secondsOffline = Math.floor((Date.now() - parsed.lastSaveTime) / 1000);
+                        if (secondsOffline > 5) {
+                            let passiveSec = game.myBank.unlocked ? game.myBank.income : 0;
+                            game.businesses.forEach(b => {
+                                if (!b.isCustomBank && b.level > 0) passiveSec += b.income * Math.pow(1.4, b.level - 1);
+                            });
+                            game.realEstate.forEach(r => {
+                                if (r.owned) passiveSec += r.income;
+                            });
+
+                            let offlineEarnings = passiveSec * secondsOffline;
+                            if (offlineEarnings > 0) {
+                                game.cash += offlineEarnings;
+                                setTimeout(() => {
+                                    showModal("Progresso Offline", `Enquanto você esteve fora, seus negócios geraram um total de ${formatMoney(offlineEarnings)}!`);
+                                }, 500);
+                            }
+                        }
+                    }
+                } catch(e) {
+                    console.error("Erro ao carregar o jogo:", e);
+                }
+            }
+        }
+
+        function workClick() {
+            let currentTier = workTiers.find(t => t.level === game.workLevel) || workTiers[workTiers.length - 1];
+            let multiplier = game.boostActive ? 2 : 1;
+            game.cash += currentTier.income * multiplier;
+            updateUI();
+            saveGame();
+        }
+
+        function activateBoost() {
+            if (game.boostActive) {
+                showModal("Impulsionamento Ativo", "O bônus de impulsionamento já está em andamento!");
+                return;
+            }
+            let cost = 50;
+            if (game.cash >= cost) {
+                game.cash -= cost;
+                game.boostActive = true;
+                game.boostTimer = 20;
+                updateUI();
+                saveGame();
+            } else {
+                showModal("Saldo Insuficiente", "Você precisa de R$ 50,00 de dinheiro líquido para ativar o impulsionamento.");
+            }
+        }
+
+        function upgradeWork() {
+            let nextTier = workTiers.find(t => t.level === game.workLevel + 1);
+            if (!nextTier) {
+                showModal("Nível Máximo", "Você já atingiu o nível máximo de carreira profissional!");
+                return;
+            }
+            if (game.cash >= nextTier.cost) {
+                game.cash -= nextTier.cost;
+                game.workLevel++;
+                updateUI();
+                saveGame();
+            } else {
+                showModal("Saldo Insuficiente", `Você precisa de ${formatMoney(nextTier.cost)} para evoluir para ${nextTier.title}.`);
+            }
+        }
+
+        function formatMoney(amount) {
+            if (amount >= 1e9) return 'R$ ' + (amount / 1e9).toFixed(2) + 'B';
+            if (amount >= 1e6) return 'R$ ' + (amount / 1e6).toFixed(2) + 'M';
+            if (amount >= 1e3) return 'R$ ' + (amount / 1e3).toFixed(1) + 'K';
+            return 'R$ ' + amount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.remove('text-emerald-400');
+                b.classList.add('text-slate-400');
+            });
+            btn.classList.remove('text-slate-400');
+            btn.classList.add('text-emerald-400');
+        }
+
+        function updateUI() {
+            let netWorth = game.cash + game.bankSavings + game.myBank.capital;
+            game.stocks.forEach(s => netWorth += s.owned * s.price);
+            game.realEstate.forEach(r => { if(r.owned) netWorth += r.cost; });
+            game.businesses.forEach(b => { 
+                if(!b.isCustomBank && b.level > 0) netWorth += b.cost * Math.pow(1.6, b.level - 1); 
+            });
+
+            document.getElementById('net-worth').innerText = formatMoney(netWorth);
+            document.getElementById('cash').innerText = formatMoney(game.cash);
+            document.getElementById('bank-savings').innerText = formatMoney(game.bankSavings);
+
+            if (game.myBank.unlocked) {
+                document.getElementById('my-bank-section').classList.remove('hidden');
+                document.getElementById('my-bank-capital').innerText = formatMoney(game.myBank.capital);
+                let calculatedIncome = (game.myBank.capital * (game.myBank.interestRate / 100)) / 20;
+                game.myBank.income = Math.max(0, calculatedIncome);
+                document.getElementById('my-bank-income').innerText = '+' + formatMoney(game.myBank.income) + '/s';
+            } else {
+                document.getElementById('my-bank-section').classList.add('hidden');
+            }
+
+            let currentTier = workTiers.find(t => t.level === game.workLevel) || workTiers[workTiers.length - 1];
+            let nextTier = workTiers.find(t => t.level === game.workLevel + 1);
+            
+            document.getElementById('work-title').innerText = currentTier.title;
+            let displayIncome = currentTier.income * (game.boostActive ? 2 : 1);
+            document.getElementById('work-income-display').innerText = formatMoney(displayIncome);
+            
+            if (game.boostActive) {
+                document.getElementById('boost-status').classList.remove('hidden');
+                document.getElementById('boost-timer').innerText = game.boostTimer;
+                document.getElementById('boost-btn').classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                document.getElementById('boost-status').classList.add('hidden');
+                document.getElementById('boost-btn').classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+
+            if (nextTier) {
+                document.getElementById('work-upgrade-cost').innerText = formatMoney(nextTier.cost);
+            } else {
+                document.getElementById('work-upgrade-cost').innerText = "MAX";
+            }
+
+            let passiveSec = game.myBank.income;
+            game.businesses.forEach(b => {
+                if (!b.isCustomBank && b.level > 0) passiveSec += b.income * Math.pow(1.4, b.level - 1);
+            });
+            game.realEstate.forEach(r => {
+                if (r.owned) passiveSec += r.income;
+            });
+            document.getElementById('passive-income').innerText = '+' + formatMoney(passiveSec) + '/s';
+
+            renderBusinesses();
+            renderStocks();
+            renderRealEstate();
+            renderLoan();
+        }
+
+        function renderBusinesses() {
+            const container = document.getElementById('businesses-list');
+            container.innerHTML = '';
+            game.businesses.forEach(b => {
+                if (b.isCustomBank && game.myBank.unlocked) {
+                    let card = document.createElement('div');
+                    card.className = "bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col justify-between gap-4 shadow-lg";
+                    card.innerHTML = `
+                        <div class="flex items-center gap-4">
+                            <div class="bg-purple-500/10 p-3.5 rounded-2xl border border-purple-500/20 text-purple-400">
+                                <i class="fa-solid ${b.icon} text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-200 text-base">${b.name}</h3>
+                                <p class="text-xs text-purple-400 font-bold">Banco Fundado</p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-950/50 p-3 rounded-2xl border border-slate-800/60 text-xs text-center">
+                            <span class="text-slate-400 block">Gerencie taxas e capital alocado acima</span>
+                        </div>
+                        <button disabled class="w-full bg-slate-800 text-slate-500 text-xs py-3 rounded-2xl font-bold cursor-not-allowed">
+                            Instituição Ativa
+                        </button>
+                    `;
+                    container.appendChild(card);
+                    return;
+                }
+
+                let upgradeCost = b.level === 0 ? b.cost : Math.round(b.cost * Math.pow(1.6, b.level));
+                let currentIncome = b.level === 0 ? 0 : b.income * Math.pow(1.4, b.level - 1);
+                
+                let card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col justify-between gap-4 shadow-lg";
+                card.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="bg-blue-500/10 p-3.5 rounded-2xl border border-blue-500/20 text-blue-400">
+                            <i class="fa-solid ${b.icon} text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-200 text-base">${b.name}</h3>
+                            <p class="text-xs text-slate-400">Nível: <span class="text-slate-200 font-bold">${b.level}</span></p>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-950/50 p-3 rounded-2xl border border-slate-800/60 text-xs">
+                        <div>
+                            <span class="text-slate-400 block text-[10px]">Lucro Atual</span>
+                            <span class="font-bold text-emerald-400 text-sm">+${formatMoney(currentIncome)}/s</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-slate-400 block text-[10px]">${b.level === 0 ? 'Custo' : 'Custo Upgrade'}</span>
+                            <span class="font-bold text-slate-200 text-sm">${formatMoney(upgradeCost)}</span>
+                        </div>
+                    </div>
+                    <button onclick="upgradeBusiness('${b.id}')" class="w-full bg-blue-600 hover:bg-blue-500 text-xs py-3 rounded-2xl font-bold cursor-pointer transition shadow-md">
+                        ${b.level === 0 ? (b.isCustomBank ? 'Fundar Banco Próprio' : 'Comprar Negócio') : 'Expandir (Nível ' + (b.level + 1) + ')'}
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function upgradeBusiness(id) {
+            let b = game.businesses.find(item => item.id === id);
+            let cost = b.level === 0 ? b.cost : Math.round(b.cost * Math.pow(1.6, b.level));
+            if (game.cash >= cost) {
+                game.cash -= cost;
+                b.level++;
+                if (b.isCustomBank) {
+                    game.myBank.unlocked = true;
+                    game.myBank.capital = 50000;
+                }
+                updateUI();
+                saveGame();
+            } else {
+                showModal("Saldo Insuficiente", "Você precisa de mais dinheiro líquido para adquirir ou expandir este negócio.");
+            }
+        }
+
+        function updateBankRate(val) {
+            game.myBank.interestRate = parseInt(val);
+            document.getElementById('my-bank-rate-val').innerText = val + '%';
+            updateUI();
+            saveGame();
+        }
+
+        function investInMyBank() {
+            let addAmount = 10000;
+            if (game.cash >= addAmount) {
+                game.cash -= addAmount;
+                game.myBank.capital += addAmount;
+                updateUI();
+                saveGame();
+            } else {
+                showModal("Saldo Insuficiente", "Você precisa de pelo menos R$ 10.000,00 de dinheiro líquido para alocar no seu banco.");
+            }
+        }
+
+        function withdrawFromMyBank() {
+            let removeAmount = 10000;
+            if (game.myBank.capital >= removeAmount) {
+                game.myBank.capital -= removeAmount;
+                game.cash += removeAmount;
+                updateUI();
+                saveGame();
+            } else {
+                showModal("Capital Insuficiente", "Não há capital suficiente para retirada no seu banco.");
+            }
+        }
+
+        function renderStocks() {
+            const container = document.getElementById('stocks-list');
+            container.innerHTML = '';
+            game.stocks.forEach(s => {
+                let marketValue = s.owned * s.price;
+                let profitLoss = marketValue - s.totalInvested;
+                let profitLossClass = profitLoss >= 0 ? 'text-emerald-400' : 'text-rose-400';
+                let profitLossSign = profitLoss >= 0 ? '+' : '';
+
+                let card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col justify-between gap-4 shadow-lg";
+                card.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-slate-200 text-base">${s.name}</h3>
+                        <span class="font-bold text-emerald-400 text-sm">Preço: ${formatMoney(s.price)}</span>
+                    </div>
+                    <div class="bg-slate-950/50 p-3.5 rounded-2xl border border-slate-800/60 text-xs space-y-1.5">
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Quantidade:</span>
+                            <span class="font-bold text-slate-200">${s.owned} un.</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Total Gasto (Investido):</span>
+                            <span class="font-bold text-slate-200">${formatMoney(s.totalInvested)}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Valor de Mercado:</span>
+                            <span class="font-bold text-slate-200">${formatMoney(marketValue)}</span>
+                        </div>
+                        <div class="flex justify-between border-t border-slate-800/80 pt-2">
+                            <span class="text-slate-400">Lucro / Prejuízo:</span>
+                            <span class="font-bold ${profitLossClass}">${profitLossSign}${formatMoney(profitLoss)}</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="buyStock('${s.id}', 1)" class="bg-emerald-600 hover:bg-emerald-500 text-xs py-3 rounded-2xl font-bold cursor-pointer transition shadow-md">Comprar 1</button>
+                        <button onclick="sellStock('${s.id}', 1)" class="bg-rose-600/80 hover:bg-rose-500 text-xs py-3 rounded-2xl font-bold cursor-pointer transition shadow-md">Vender 1</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function buyStock(id, amount) {
+            let s = game.stocks.find(item => item.id === id);
+            let cost = s.price * amount;
+            if (game.cash >= cost) {
+                game.cash -= cost;
+                s.owned += amount;
+                s.totalInvested += cost;
+                updateUI();
+                saveGame();
+            } else {
+                showModal("Saldo Insuficiente", "Você não tem dinheiro suficiente para comprar este ativo.");
+            }
+        }
+
+        function sellStock(id, amount) {
+            let s = game.stocks.find(item => item.id === id);
+            if (s.owned >= amount) {
+                let avgCost = s.owned > 0 ? s.totalInvested / s.owned : 0;
+                s.owned -= amount;
+                s.totalInvested -= avgCost * amount;
+                if (s.owned === 0) s.totalInvested = 0;
+
+                game.cash += s.price * amount;
+                updateUI();
+                saveGame();
+            } else {
+                showModal("Aviso", "Você não possui unidades suficientes para vender.");
+            }
+        }
+
+        function renderRealEstate() {
+            const container = document.getElementById('realestate-list');
+            container.innerHTML = '';
+            game.realEstate.forEach(r => {
+                let card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col justify-between gap-4 shadow-lg";
+                card.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="bg-amber-500/10 p-3.5 rounded-2xl border border-amber-500/20 text-amber-400">
+                            <i class="fa-solid ${r.icon} text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-200 text-base">${r.name}</h3>
+                            <p class="text-xs text-slate-400 mt-0.5">${r.owned ? '<span class="text-emerald-400 font-bold">Adquirido</span>' : formatMoney(r.cost)}</p>
+                        </div>
+                    </div>
+                    <div class="text-xs text-slate-400 bg-slate-950/50 p-3 rounded-2xl border border-slate-800/60">
+                        Rendimento: <span class="text-emerald-400 font-bold text-sm">+${formatMoney(r.income)}/s</span>
+                    </div>
+                    <button onclick="buyRealEstate('${r.id}')" ${r.owned ? 'disabled' : ''} class="w-full ${r.owned ? 'bg-slate-800 text-slate-500 cursor-not-allowed' : 'bg-amber-600 hover:bg-amber-500 text-white cursor-pointer'} text-xs py-3 rounded-2xl font-bold transition shadow-md">
+                        ${r.owned ? 'Já Adquirido' : 'Comprar Imóvel'}
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function buyRealEstate(id) {
+            let r = game.realEstate.find(item => item.id === id);
+            if (!r.owned && game.cash >= r.cost) {
+                game.cash -= r.cost;
+                r.owned = true;
+                updateUI();
+                saveGame();
+            } else if (!r.owned) {
+                showModal("Saldo Insuficiente", "Você precisa de mais capital para adquirir este imóvel.");
+            }
+        }
+
+        function depositBank() {
+            if (game.cash > 0) {
+                game.bankSavings += game.cash;
+                game.cash = 0;
+                updateUI();
+                saveGame();
+            }
+        }
+
+        function withdrawBank() {
+            if (game.bankSavings > 0) {
+                game.cash += game.bankSavings;
+                game.bankSavings = 0;
+                updateUI();
+                saveGame();
+            }
+        }
+
+        function renderLoan() {
+            const container = document.getElementById('loan-container');
+            let timerText = game.loan > 0 ? (game.loanHoursLeft > 0 ? `Restam ${game.loanHoursLeft}h do jogo` : `<span class="text-rose-500 font-bold">VENCIDO! Juros acumulando!</span>`) : 'Nenhum empréstimo ativo';
+            
+            container.innerHTML = `
+                <div class="bg-slate-950/50 p-4 rounded-2xl border border-slate-800/60 text-xs mb-4 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-400">Dívida Total (com juros)</span>
+                        <span class="font-bold text-rose-400 text-sm">${formatMoney(game.loan)}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-400">Limite Disponível</span>
+                        <span class="font-bold text-emerald-400 text-sm">${formatMoney(game.loanLimit)}</span>
+                    </div>
+                    <div class="flex justify-between items-center pt-2 border-t border-slate-800">
+                        <span class="text-slate-400">Prazo de Pagamento</span>
+                        <span class="font-bold text-amber-400">${timerText}</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <button onclick="openLoanModal()" class="bg-purple-600 hover:bg-purple-500 text-xs py-3 rounded-2xl font-bold cursor-pointer transition shadow-md">Pedir Empréstimo</button>
+                    <button onclick="payLoanInstallment()" class="bg-blue-600 hover:bg-blue-500 text-xs py-3 rounded-2xl font-bold cursor-pointer transition shadow-md">Pagar Parcela (R$ 100)</button>
+                    <button onclick="payLoanFull()" class="bg-emerald-600 hover:bg-emerald-500 text-xs py-3 rounded-2xl font-bold cursor-pointer transition shadow-md">Quitar Tudo</button>
+                </div>
+            `;
+        }
+
+        function openLoanModal() {
+            if (game.loan > 0) {
+                showModal("Empréstimo", "Você já possui um empréstimo ativo. Pague ou abata o atual antes de pedir mais.");
+                return;
+            }
+            document.getElementById('loan-modal-limit').innerText = formatMoney(game.loanLimit);
+            document.getElementById('loan-input-amount').value = game.loanLimit;
+            document.getElementById('loan-modal').classList.remove('hidden');
+        }
+
+        function closeLoanModal() {
+            document.getElementById('loan-modal').classList.add('hidden');
+        }
+
+        function confirmTakeLoan() {
+            let amount = parseFloat(document.getElementById('loan-input-amount').value);
+            if (isNaN(amount) || amount <= 0) {
+                showModal("Valor Inválido", "Digite um valor válido para o empréstimo.");
+                return;
+            }
+            if (amount > game.loanLimit) {
+                showModal("Limite Excedido", `O valor máximo que você pode pedir é ${formatMoney(game.loanLimit)}.`);
+                return;
+            }
+
+            let totalWithInterest = amount * 2.0;
+            game.loan = totalWithInterest;
+            game.cash += amount;
+            game.loanHoursLeft = 48; 
+            closeLoanModal();
+            updateUI();
+            saveGame();
+        }
+
+        function payLoanInstallment() {
+            let installment = 100;
+            if (game.loan > 0) {
+                let payVal = Math.min(installment, game.loan);
+                if (game.cash >= payVal) {
+                    game.cash -= payVal;
+                    game.loan -= payVal;
+                    if (game.loan <= 0) {
+                        game.loan = 0;
+                        game.loanHoursLeft = 0;
+                        game.loanLimit = Math.round(game.loanLimit * 1.5);
+                        showModal("Dívida Quitada", `Parabéns! Você pagou toda a dívida. Seu limite de crédito subiu para ${formatMoney(game.loanLimit)}!`);
+                    } else {
+                        showModal("Parcela Paga", `Você pagou uma parcela de ${formatMoney(payVal)}. Restam ${formatMoney(game.loan)}.`);
+                    }
+                    updateUI();
+                    saveGame();
+                } else {
+                    showModal("Saldo Insuficiente", "Você não tem saldo líquido suficiente para pagar esta parcela.");
+                }
+            } else {
+                showModal("Aviso", "Não há dívidas pendentes.");
+            }
+        }
+
+        function payLoanFull() {
+            if (game.loan > 0 && game.cash >= game.loan) {
+                game.cash -= game.loan;
+                game.loan = 0;
+                game.loanHoursLeft = 0;
+                game.loanLimit = Math.round(game.loanLimit * 1.5);
+                showModal("Dívida Quitada", `Parabéns! Você quitou o empréstimo em dia. Seu limite de crédito subiu para ${formatMoney(game.loanLimit)}!`);
+                updateUI();
+                saveGame();
+            } else if (game.loan > 0) {
+                showModal("Saldo Insuficiente", "Você não tem dinheiro líquido suficiente para quitar toda a dívida (incluindo os juros cobrados).");
+            } else {
+                showModal("Aviso", "Não há nenhuma dívida pendente.");
+            }
+        }
+
+        function showModal(title, msg) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-message').innerText = msg;
+            document.getElementById('modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.add('hidden');
+        }
+
+        // Loop Principal do Jogo (1 vez por segundo)
+        setInterval(() => {
+            let passiveSec = game.myBank.income;
+            game.businesses.forEach(b => {
+                if (!b.isCustomBank && b.level > 0) passiveSec += b.income * Math.pow(1.4, b.level - 1);
+            });
+            game.realEstate.forEach(r => {
+                if (r.owned) passiveSec += r.income;
+            });
+            game.cash += passiveSec;
+
+            if (game.boostActive) {
+                game.boostTimer--;
+                if (game.boostTimer <= 0) {
+                    game.boostActive = false;
+                }
+            }
+
+            if (game.loan > 0) {
+                game.secondCounter++;
+                if (game.secondCounter >= 60) {
+                    game.secondCounter = 0;
+                    if (game.loanHoursLeft > 0) {
+                        game.loanHoursLeft--; 
+                    } else {
+                        game.loan = Math.round(game.loan * 1.05 * 100) / 100;
+                    }
+                }
+
+                if (passiveSec > 0 && game.loan > 0) {
+                    let autoDeduction = Math.min(passiveSec * 0.5, game.loan, game.cash);
+                    if (autoDeduction > 0) {
+                        game.cash -= autoDeduction;
+                        game.loan -= autoDeduction;
+                        if (game.loan <= 0) {
+                            game.loan = 0;
+                            game.loanLimit = Math.round(game.loanLimit * 1.4);
+                        }
+                    }
+                }
+            }
+
+            game.stocks.forEach(s => {
+                let changePercent = (Math.random() * 14 - 6.8) / 100;
+                s.price = Math.max(10, Math.round((s.price * (1 + changePercent)) * 100) / 100);
+            });
+
+            updateUI();
+            saveGame();
+        }, 1000);
+
+        loadGame();
+        updateUI();
+    </script>
+</body>
+</html>
